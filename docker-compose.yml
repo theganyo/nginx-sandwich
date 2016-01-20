@@ -1,0 +1,25 @@
+nginx:
+  build: nginx
+  ports:
+  - '80:8080'
+  links:
+  - gateway:gateway
+
+nginx2:
+  build: nginx
+  links:
+  - target1:target1
+  - target2:target2
+
+gateway:
+  build: gateway
+  environment:
+    outbound: http://outbound:8081
+  links:
+  - nginx2:outbound
+
+target1:
+  build: target
+
+target2:
+  build: target
