@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+  labels:
+    app: router
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: gateway
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: gateway
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+      - name: nginx
+        image: scottganyo/nginx-sandwich-nginx
+        ports:
+        - containerPort: 8080
+        - containerPort: 8081
+      - name: micro-gateway
+        image: scottganyo/nginx-sandwich-gateway
+        ports:
+        - containerPort: 10010
