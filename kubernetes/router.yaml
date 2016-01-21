@@ -7,9 +7,14 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 80
+    - name: inbound
+      port: 80
       targetPort: 8080
-    - port: 8081
+      protocol: TCP
+    - name: outbound
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
   selector:
     app: gateway
   externalIPs:
@@ -30,43 +35,46 @@ spec:
       - name: nginx
         image: scottganyo/nginx-sandwich-nginx
         ports:
-        - containerPort: 8080 # inbound
-        - containerPort: 8081 # outbound
+        - name: inbound
+          containerPort: 8080 # inbound
+        - name: outbound
+          containerPort: 8081 # outbound
       - name: micro-gateway
         image: scottganyo/nginx-sandwich-gateway
         ports:
-        - containerPort: 10010
+        - name: service
+          containerPort: 10010
         env:
         - name: outbound
-          value: http://nginx:8081
----
-apiVersion: v1
-kind: Service
-metadata:
-name: target
-labels:
-  app: target
-spec:
-type: NodePort
-ports:
-  - port: 10010
-    targetPort: 10010
-selector:
-  app: target
----
-apiVersion: v1
-kind: ReplicationController
-metadata:
-name: target
-spec:
-replicas: 1
-template:
-  metadata:
-    labels:
-      app: target
-  spec:
-    containers:
-    - name: target
-      image: scottganyo/nginx-sandwich-target
-      ports:
-      - containerPort: 10010
+          value: http://router:8081
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#name: target
+#labels:
+#  app: target
+#spec:
+#type: NodePort
+#ports:
+#  - port: 10010
+#    targetPort: 10010
+#selector:
+#  app: target
+#---
+#apiVersion: v1
+#kind: ReplicationController
+#metadata:
+#name: target
+#spec:
+#replicas: 1
+#template:
+#  metadata:
+#    labels:
+#      app: target
+#  spec:
+#    containers:
+#    - name: target
+#      image: scottganyo/nginx-sandwich-target
+#      ports:
+#      - containerPort: 10010
