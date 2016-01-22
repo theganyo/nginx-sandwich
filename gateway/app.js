@@ -11,7 +11,7 @@ app.get('/', (req, res, next) => {
 
   // back to nginx 
   const options = {
-    url: 'http://gateway:8081',
+    url: 'http://router:8081',
     headers: {
       'Host': req.get('host')
     }
