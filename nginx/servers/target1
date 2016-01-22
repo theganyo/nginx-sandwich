@@ -13,8 +13,7 @@ server {
   server_name  target1;
 
   location / {
-#    proxy_pass http://gateway:10010;
-    proxy_pass http://localhost:10010;
+    proxy_pass http://gateway;
 
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -30,7 +29,7 @@ server {
   server_name  target1;
 
   location / {
-    return 200; # will change to k8s local target
+    return 200;
       
 #     proxy_pass http://target1:10010;
 #     proxy_set_header X-Real-IP $remote_addr;

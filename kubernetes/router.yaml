@@ -1,9 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: router
-  labels:
-    app: router
+  name: nginx-inbound
 spec:
   type: NodePort
   ports:
@@ -11,25 +9,49 @@ spec:
       port: 80
       targetPort: 8080
       protocol: TCP
-    - name: outbound
-      port: 8081
-      targetPort: 8081
-      protocol: TCP
   selector:
-    app: gateway
+    app: ingester
   externalIPs:
   - 172.17.4.101
 ---
 apiVersion: v1
-kind: ReplicationController
+kind: Service
+metadata:
+  name: nginx-outbound
+spec:
+  type: NodePort
+  ports:
+    - name: outbound
+      port: 80
+      targetPort: 8081
+      protocol: TCP
+  selector:
+    app: ingester
+---
+apiVersion: v1
+kind: Service
 metadata:
   name: gateway
+spec:
+  type: NodePort
+  ports:
+    - name: service
+      port: 80
+      targetPort: 10010
+      protocol: TCP
+  selector:
+    app: ingester
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: ingester
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: gateway
+        app: ingester
     spec:
       containers:
       - name: nginx
@@ -46,7 +68,7 @@ spec:
           containerPort: 10010
         env:
         - name: outbound
-          value: http://router:8081
+          value: http://nginx-outbound
 #---
 #apiVersion: v1
 #kind: Service
