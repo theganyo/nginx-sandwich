@@ -11,7 +11,7 @@ app.get('/', (req, res, next) => {
 
   // back to nginx 
   const options = {
-    url: 'http://router:8081',
+    url: 'http://localhost:8081', // Can't figure out how to get the DNS to work with this
     headers: {
       'Host': req.get('host')
     }
