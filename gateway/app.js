@@ -2,6 +2,8 @@ const express = require('express')
 const http = require('http')
 const request = require('request')
 
+const outbound_nginx = process.env.outbound
+
 const app = express();
 app.set('port', process.env.PORT || 10010)
 
@@ -9,9 +11,9 @@ app.get('/', (req, res, next) => {
 
   console.log(req.headers)
 
-  // back to nginx 
+  // back to nginx
   const options = {
-    url: 'http://localhost:8081', // Can't figure out how to get the DNS to work with this
+    url: outbound_nginx,
     headers: {
       'Host': req.get('host')
     }
