@@ -1,51 +1,58 @@
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+#  name: nginx-ingress
+#spec:
+#  backend:
+#    serviceName: nginx-inbound
+#    servicePort: 80
+#---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-inbound
+  name: inbound
 spec:
   type: NodePort
   ports:
     - port: 80
       targetPort: 8080
   selector:
-    app: ingester
-  externalIPs:
-  - 192.168.64.128
+    app: gateway
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-outbound
+  name: outbound
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 8081
   selector:
-    app: ingester
+    app: gateway
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-gateway
+  name: nginx-gateway   # matches host name used for gateway service in nginx config
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 10010
   selector:
-    app: ingester
+    app: gateway
 ---
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: ingester
+  name: gateway
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: ingester
+        app: gateway
     spec:
       containers:
       - name: nginx
@@ -58,36 +65,34 @@ spec:
         ports:
         - containerPort: 10010
         env:
-        - name: outbound
-          value: http://nginx-outbound
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#name: target
-#labels:
-#  app: target
-#spec:
-#type: NodePort
-#ports:
-#  - port: 10010
-#    targetPort: 10010
-#selector:
-#  app: target
-#---
-#apiVersion: v1
-#kind: ReplicationController
-#metadata:
-#name: target
-#spec:
-#replicas: 1
-#template:
-#  metadata:
-#    labels:
-#      app: target
-#  spec:
-#    containers:
-#    - name: target
-#      image: scottganyo/nginx-sandwich-target
-#      ports:
-#      - containerPort: 10010
+        - name: outbound                 # used by gateway as outgoing host
+          value: http://outbound
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: target2
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 10010
+  selector:
+    app: target
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: target
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: target
+    spec:
+      containers:
+      - name: target
+        image: scottganyo/nginx-sandwich-target
+        ports:
+        - containerPort: 10010
