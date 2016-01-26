@@ -1,19 +1,9 @@
-# server {
-#   listen       8080;
-#   server_name  gateway;
-# 
-#   location / {
-#     return 200;
-#   }
-# }
-
-
 server {
   listen       8080;
   server_name  target1;
 
   location / {
-    proxy_pass http://gateway;
+    proxy_pass http://nginx-gateway;
 
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -29,7 +19,7 @@ server {
   server_name  target1;
 
   location / {
-    return 200;
+    return 200; # simple test
       
 #     proxy_pass http://target1:10010;
 #     proxy_set_header X-Real-IP $remote_addr;

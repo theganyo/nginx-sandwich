@@ -3,7 +3,7 @@ server {
   server_name  target2;
 
   location / {
-    proxy_pass http://gateway;
+    proxy_pass http://nginx-gateway;
 
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -19,7 +19,7 @@ server {
   server_name  target2;
 
   location / {
-    proxy_pass http://10.0.1.61:10010;
+    proxy_pass http://10.0.1.61:10010; # external IP
 
 #       root   html;
 #       index  index.html index.htm;
